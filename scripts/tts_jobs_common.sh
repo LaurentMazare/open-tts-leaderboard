@@ -68,6 +68,8 @@ SIM_OVERWRITE="${SIM_OVERWRITE:-false}"
 ASR_OVERWRITE="${ASR_OVERWRITE:-false}"
 # Same for stage 4 (forced when `generate` runs).
 UTMOS_OVERWRITE="${UTMOS_OVERWRITE:-false}"
+# Languages (asr_language) that get stage 4; keep in sync with UTMOS_LANGUAGES in normalizer/eval_utils.py.
+UTMOS_LANGS="${UTMOS_LANGS:-en zh fr}"
 MAX_AUDIO_SECONDS="${MAX_AUDIO_SECONDS:-30}" # clip cap for ASR + SIM + UTMOS (0 = no cap)
 # Clone each sample's prompt speaker (+ SIM stage) on backends that support it; false = the model's
 # own fixed/default voice. Ignored by fixed-voice backends.
@@ -89,6 +91,7 @@ SCORER_IMAGE="hf.co/spaces/${SPACE}"
 # expose the same columns the backends read: `text` + `prompt_text`/`prompt_audio` when cloning.
 DATASET_CONFIGS=("tts en en")
 
+utmos_language() { [[ " ${UTMOS_LANGS} " == *" $1 "* ]]; }
 stage_enabled() { [[ " ${STAGES} " == *" $1 "* ]]; }
 
 # ── Injection helpers ────────────────────────────────────────────────────────
@@ -267,10 +270,11 @@ _wait_and_score() {
         sync_out=$(timeout "${SYNC_TIMEOUT:-600}" hf buckets sync "hf://buckets/${RESULTS_BUCKET}/${MODEL_FOLDER}" "./results/${MODEL_FOLDER}" --exclude "*.wav" 2>&1) ||
             echo "WARNING: bucket sync failed (attempt ${attempt}/5):"$'\n'"${sync_out}"
         missing=()
-        for name in "${MANIFEST_NAMES[@]}"; do
+        for i in "${!MANIFEST_NAMES[@]}"; do
+            name="${MANIFEST_NAMES[$i]}"
             # -s, not -f: an interrupted download leaves a 0-byte file behind.
             [[ -s "./results/${MODEL_FOLDER}/${name}" ]] || missing+=("${name}")
-            stage_enabled utmos && [[ ! -s "./results/${MODEL_FOLDER}/UTMOS_${name%.jsonl}.json" ]] &&
+            stage_enabled utmos && utmos_language "${LANGS[$i]}" && [[ ! -s "./results/${MODEL_FOLDER}/UTMOS_${name%.jsonl}.json" ]] &&
                 missing+=("UTMOS_${name%.jsonl}.json")
         done
         [[ ${#missing[@]} -eq 0 ]] && break
@@ -377,7 +381,7 @@ run_pipeline() {
                 stage_enabled generate   && run_stage generate_stage
                 stage_enabled transcribe && run_stage transcribe_stage
                 stage_enabled sim && [[ "${CLONE}" == "true" ]] && run_stage sim_stage
-                stage_enabled utmos      && run_stage utmos_stage
+                stage_enabled utmos && utmos_language "${ASR_LANG}" && run_stage utmos_stage
                 true   # ensure subshell exit status is 0 when the last `&&` chain is a skipped stage
             ) > "${CHAIN_LOG}" 2>&1 &
             PIDS+=("$!"); TAGS+=("${DATASET}/${SPLIT}"); CHAIN_LOGS+=("${CHAIN_LOG}")

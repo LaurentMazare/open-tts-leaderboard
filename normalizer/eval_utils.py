@@ -187,6 +187,8 @@ def read_manifest(manifest_path: str):
 # SIM backends that score into their own manifest fork, <manifest>_<backend>.jsonl (keep in sync
 # with `sim_manifest_path` in transformers/score_similarity.py). `xvector` writes `sim` in place.
 SIM_BACKEND_SUFFIXES = ("wavlm_seed_tts",)
+# UTMOS22 is trained on English only; reported for these languages for now.
+UTMOS_LANGUAGES = {"en", "zh", "fr"}
 
 
 def read_utmos(manifest_path: str, manifest: list):
@@ -351,7 +353,7 @@ def score_results(directory: str, model_id: str = None, multilingual: bool = Non
         else:
             sims = [datum["sim"] for datum in manifest if isinstance(datum.get("sim"), (int, float))]
         sim = round(100 * sum(sims) / len(sims), 2) if sims else None
-        utmos = read_utmos(result_file, manifest)
+        utmos = read_utmos(result_file, manifest) if language in UTMOS_LANGUAGES else None
 
         if use_cer:
             # Per-character alignment (merge_compounds is moot). The headline CJK number is the
