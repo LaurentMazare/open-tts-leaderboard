@@ -63,7 +63,9 @@ def score_manifest(model, manifest_path, args):
 
 
 def main(args):
-    model = torch.hub.load(SPEECHMOS_REPO, SPEECHMOS_ENTRY, trust_repo=True, pretrained=False)
+    # skip_validation: the fork check hits the unauthenticated GitHub API, which rate-limits (403)
+    # when several jobs start at once; the ref is pinned by commit, so the check adds nothing.
+    model = torch.hub.load(SPEECHMOS_REPO, SPEECHMOS_ENTRY, trust_repo=True, pretrained=False, skip_validation=True)
     ckpt = os.path.join(torch.hub.get_dir(), "checkpoints", f"{CKPT_SHA256}.pt")
     if not os.path.exists(ckpt):
         os.makedirs(os.path.dirname(ckpt), exist_ok=True)

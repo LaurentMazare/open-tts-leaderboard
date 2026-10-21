@@ -187,8 +187,11 @@ def read_manifest(manifest_path: str):
 # SIM backends that score into their own manifest fork, <manifest>_<backend>.jsonl (keep in sync
 # with `sim_manifest_path` in transformers/score_similarity.py). `xvector` writes `sim` in place.
 SIM_BACKEND_SUFFIXES = ("wavlm_seed_tts",)
-# UTMOS22 is trained on English only; reported for these languages for now.
-UTMOS_LANGUAGES = {"en", "zh", "fr"}
+# UTMOS22 is trained on English only, so it is scored and reported for English only.
+UTMOS_LANGUAGES = {"en"}
+# Languages that still get a (possibly empty) `<lang> UTMOS` column in the leaderboard CSVs, so
+# UTMOS can be enabled for them later without changing the published header.
+UTMOS_COLUMN_LANGUAGES = {"en", "zh", "fr"}
 
 
 def read_utmos(manifest_path: str, manifest: list):

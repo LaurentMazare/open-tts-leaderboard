@@ -55,7 +55,7 @@ sys.path.insert(0, REPO_ROOT)  # so `from normalizer import ...` resolves regard
 
 from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download  # noqa: E402
 
-from normalizer.eval_utils import SIM_BACKEND_SUFFIXES, UTMOS_LANGUAGES, default_multilingual, score_results  # noqa: E402
+from normalizer.eval_utils import SIM_BACKEND_SUFFIXES, UTMOS_COLUMN_LANGUAGES, default_multilingual, score_results  # noqa: E402
 
 # Where the results live, and where they are published.
 RESULTS_BUCKET = "hf-audio/tts_leaderboard_h200"
@@ -453,7 +453,7 @@ def add_utmos_columns(published, languages):
     header = published.header
     if any(column.endswith(" UTMOS") for column in header):
         return published
-    header = header + [f"{lang} UTMOS" for lang in languages if lang in UTMOS_LANGUAGES]
+    header = header + [f"{lang} UTMOS" for lang in languages if lang in UTMOS_COLUMN_LANGUAGES]
     if any(column.startswith("avg ") for column in header):
         header.append("avg UTMOS")
     buffer = io.StringIO(newline="")

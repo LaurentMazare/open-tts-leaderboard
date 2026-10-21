@@ -69,7 +69,7 @@ ASR_OVERWRITE="${ASR_OVERWRITE:-false}"
 # Same for stage 4 (forced when `generate` runs).
 UTMOS_OVERWRITE="${UTMOS_OVERWRITE:-false}"
 # Languages (asr_language) that get stage 4; keep in sync with UTMOS_LANGUAGES in normalizer/eval_utils.py.
-UTMOS_LANGS="${UTMOS_LANGS:-en zh fr}"
+UTMOS_LANGS="${UTMOS_LANGS:-en}"
 MAX_AUDIO_SECONDS="${MAX_AUDIO_SECONDS:-30}" # clip cap for ASR + SIM + UTMOS (0 = no cap)
 # Clone each sample's prompt speaker (+ SIM stage) on backends that support it; false = the model's
 # own fixed/default voice. Ignored by fixed-voice backends.
