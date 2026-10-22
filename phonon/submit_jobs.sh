@@ -24,15 +24,10 @@ generate_stage() {
     printf -v runner '%q ' python3 /app/phonon/run_eval.py "${args[@]}"
     command="set -euo pipefail
         ${RUN_EVAL_INJECT} true || exit 1
-        umask 077
-        for existing in '${BUCKET_MANIFEST}' '${BUCKET_MANIFEST%.jsonl}.run.json' \
-            '/results/${MODEL_FOLDER}/${DATASET_SAFE}_${DATASET}_${SPLIT}'; do
-            test ! -e \"\$existing\" || { echo 'Quality artifacts already exist; inspect before rerunning.' >&2; exit 1; }
-        done
-        work_dir=\$(mktemp -d /tmp/phonon-quality.XXXXXXXX)
-        ${runner} --output_root \"\$work_dir\"
+        # run_eval.py writes to its own output root (outside Git, mode 0700); a rerun overwrites the bucket copy.
+        ${runner} --output_root /tmp/phonon
         mkdir -p '/results/${MODEL_FOLDER}'
-        source_model=\"\$work_dir/results/${MODEL_SAFE}\"
+        source_model=/tmp/phonon/results/${MODEL_SAFE}
         cp -r \"\$source_model/${DATASET_SAFE}_${DATASET}_${SPLIT}\" '/results/${MODEL_FOLDER}/'
         cp \"\$source_model/$(basename "${BUCKET_MANIFEST%.jsonl}.run.json")\" '${BUCKET_MANIFEST%.jsonl}.run.json'
         cp \"\$source_model/$(basename "$BUCKET_MANIFEST")\" '${BUCKET_MANIFEST}'
