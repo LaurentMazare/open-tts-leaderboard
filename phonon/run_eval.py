@@ -35,8 +35,8 @@ from run_eval_utils import (
 
 
 MODEL_REVISIONS = {
-    "gradium/phonon-31m-en": "52433c46975bfa13144c56204c9f4ee1c5b148aa",
-    "gradium/phonon-40m-en": "9b95393286eaeeebf1330b2ae90a14a2074c415d",
+    "gradium/phonon-31m-en": "92741c5b07d085ff840e26fea8ce43110b87852f",
+    "gradium/phonon-40m-en": "cc738b7e4d182c2ba1bafb8062aa4846af000637",
 }
 
 
